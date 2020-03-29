@@ -1,14 +1,14 @@
 ---
 - become: true
-  become_method: su
+  become_method: sudo
   become_user: root
   connection: ssh
   hosts:
     - lxd_hosts
   tasks:
-    - name: set timezone America/New_York
+    - name: set timezone Europe/Berlin
       timezone:
-        name: America/New_York
+        name: Europe/Berlin
     - name: "Remove {{ ansible_user }} from all groups"
       user:
         name: "{{ ansible_user }}"
@@ -36,25 +36,20 @@
         - "AcceptEnv LANG LC_*"
         - "Subsystem sftp  /usr/lib/openssh/sftp-server"
         - ""
-        - "# allow root and {{ ansible_user }} to ssh"
+        - "# allow root and {{ ansible_user }} to ssh key only"
         - "AllowUsers {{ ansible_user }} root"
-        - "PasswordAuthentication yes"
+        - "PasswordAuthentication no"
         - "PermitRootLogin yes"
         - ""
         - "# but limit root to SSH key only"
         - "Match User root"
         - "PasswordAuthentication no"
 
-    - name: Remove "sudo" package
-      apt:
-        name: sudo
-        state: absent
-
-    - name: "Remove {{ ansible_user }} from all groups"
-      user:
-        name: "{{ ansible_user }}"
-        groups: ''
-        append: no
+    #- name: "Remove {{ ansible_user }} from all groups"
+    #  user:
+    #    name: "{{ ansible_user }}"
+    #    groups: ''
+    #    append: no
 
     - name: 'SSHD restart to load new config'
       service:
